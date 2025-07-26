@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vendas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <h2 class="mb-4">Registrar Venda</h2>
+
+    <form method="POST" class="mb-4">
+        <div class="mb-3">
+            <label for="cliente_id" class="form-label">Cliente</label>
+            <select name="cliente_id" id="cliente_id" class="form-select" required>
+                {% for cliente in clientes %}
+                    <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="produto_id" class="form-label">Produto</label>
+            <select name="produto_id" id="produto_id" class="form-select" required>
+                {% for produto in produtos %}
+                    <option value="{{ produto[0] }}">{{ produto[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="quantidade" class="form-label">Quantidade</label>
+            <input type="number" name="quantidade" id="quantidade" class="form-control" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-warning">Registrar Venda</button>
+    </form>
+
+    <h4>Vendas Realizadas</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venda in vendas %}
+            <tr>
+                <td>{{ venda[1] }}</td>
+                <td>{{ venda[2] }}</td>
+                <td>{{ venda[3] }}</td>
+                <td>{{ venda[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/" class="btn btn-secondary mt-3">Voltar</a>
+</div>
+
+</body>
+</html>
