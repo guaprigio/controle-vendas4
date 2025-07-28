@@ -12,12 +12,14 @@ app = Flask(__name__)
 def criar_banco():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS clientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL
         )
     """)
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS produtos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,6 +27,7 @@ def criar_banco():
             preco REAL NOT NULL
         )
     """)
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS vendas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,6 +39,7 @@ def criar_banco():
             FOREIGN KEY(produto_id) REFERENCES produtos(id)
         )
     """)
+
     conn.commit()
     conn.close()
 
@@ -75,6 +79,7 @@ def produtos():
 def vendas():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+
     cursor.execute("SELECT id, nome FROM clientes")
     clientes = cursor.fetchall()
     cursor.execute("SELECT id, nome FROM produtos")
@@ -105,11 +110,11 @@ def relatorios():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT c.id, c.nome, p.nome, SUM(v.quantidade) AS total_vendido
+        SELECT c.id, c.nome AS cliente, p.nome AS produto, SUM(v.quantidade) AS total_vendido
         FROM vendas v
         JOIN clientes c ON v.cliente_id = c.id
         JOIN produtos p ON v.produto_id = p.id
-        GROUP BY c.id, p.nome
+        GROUP BY c.id, c.nome, p.nome
         ORDER BY total_vendido DESC
     """)
     relatorio = cursor.fetchall()
@@ -124,6 +129,7 @@ def relatorio_pdf(cliente_id):
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+
     mes_atual = datetime.now().month
     ano_atual = datetime.now().year
 
@@ -133,6 +139,7 @@ def relatorio_pdf(cliente_id):
         JOIN produtos p ON v.produto_id = p.id
         WHERE v.cliente_id = ? AND strftime('%m', v.data) = ? AND strftime('%Y', v.data) = ?
     ''', (cliente_id, f'{mes_atual:02d}', str(ano_atual)))
+
     vendas = cursor.fetchall()
     conn.close()
 
@@ -146,19 +153,18 @@ def relatorio_pdf(cliente_id):
 
     y = height - 120
     c.setFont("Helvetica", 12)
-    for produto, quantidade, data in vendas:
+    for produto, quantidade, data_venda in vendas:
         c.drawString(50, y, produto)
         c.drawString(250, y, str(quantidade))
-        c.drawString(400, y, data)
+        c.drawString(400, y, data_venda)
         y -= 20
 
     c.showPage()
     c.save()
     buffer.seek(0)
-
     return send_file(buffer, as_attachment=True, download_name='relatorio.pdf', mimetype='application/pdf')
 
-# --- Início da aplicação ---
+# --- Execução ---
 if __name__ == '__main__':
     criar_banco()
     port = int(os.environ.get("PORT", 5000))
